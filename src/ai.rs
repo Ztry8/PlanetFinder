@@ -70,7 +70,7 @@ pub fn train_model(files: &[String], seq_len: usize) -> nn::VarStore {
             let pct = (epoch as f64 / EPOCHS as f64) * 100.0;
 
             println!(
-                "Completed {} epochs ({}% done) - current error: {:.1}",
+                "Completed {} epochs ({}% done) - current error: {:.3}",
                 epoch, pct, loss_val
             );
 
