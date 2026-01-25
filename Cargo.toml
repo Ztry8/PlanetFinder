@@ -1,6 +1,6 @@
 [package]
 name = "planet_finder"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Ztry8 (AslanD)"] 
 edition = "2024"
 description = "A neural network that detects exoplanets from stellar light curves."

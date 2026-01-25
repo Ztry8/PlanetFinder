@@ -18,7 +18,12 @@ systems = [
     ("Kepler-11", 6),
     ("Kepler-18", 3),
     ("Kepler-36", 2),
-    ("Kepler-90", 8)
+    ("Kepler-90", 8),
+    ("Kepler-80", 6),
+    ("Kepler-33", 5),
+    ("Kepler-160", 3),
+    ("Kepler-30", 3),
+    ("Kepler-47", 3),
 ]
 
 max_points = 500

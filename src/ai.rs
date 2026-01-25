@@ -8,7 +8,7 @@ use tch::{
     nn::{self, OptimizerConfig, RNN},
 };
 
-const EPOCHS: usize = 500;
+const EPOCHS: usize = 2000;
 
 fn prepare_tensors(files: &[String], seq_len: usize, device: Device) -> (Tensor, Tensor) {
     let mut xs = vec![];
@@ -52,7 +52,7 @@ pub fn train_model(files: &[String], seq_len: usize) -> nn::VarStore {
     let mut best_loss = f64::INFINITY;
 
     println!(
-        "Starting training on {} files for {} epochs...",
+        "\nStarting training on {} files for {} epochs...",
         files.len(),
         EPOCHS
     );
@@ -66,11 +66,11 @@ pub fn train_model(files: &[String], seq_len: usize) -> nn::VarStore {
 
         let loss_val = f64::from(&loss);
 
-        if epoch % (EPOCHS / 10).max(1) == 0 || epoch == EPOCHS {
+        if epoch % 50 == 0 || epoch == EPOCHS {
             let pct = (epoch as f64 / EPOCHS as f64) * 100.0;
 
             println!(
-                "Completed {} epochs ({}% done) - current error: {:.3}",
+                "\nCompleted {:>4} epochs ({:.1} % done) - current error: {:.4}",
                 epoch, pct, loss_val
             );
 
@@ -81,7 +81,7 @@ pub fn train_model(files: &[String], seq_len: usize) -> nn::VarStore {
         }
     }
 
-    println!("Training finished. Best model saved as model.ot");
+    println!("\nTraining finished. Best model saved as model.ot\n");
     vs
 }
 
@@ -91,7 +91,7 @@ pub fn predict_model(vs: &nn::VarStore, seq_len: usize) {
     let lstm = nn::lstm(root, 2, 64, Default::default());
     let linear = nn::linear(root, 64, 10, Default::default());
 
-    println!("Enter flux and time (like '0.998 131.2'), one per line. Type 'end' to finish:");
+    println!("\nEnter flux and time (like '0.998 131.2'), one per line. Type 'end' to finish:\n");
     let stdin = std::io::stdin();
     let mut data = Vec::new();
 
@@ -154,5 +154,5 @@ pub fn predict_model(vs: &nn::VarStore, seq_len: usize) {
     let last_hidden = output.select(1, seq_len as i64 - 1);
     let logits = last_hidden.apply(&linear);
     let predicted = logits.argmax(-1, false);
-    println!("Predicted number of planets: {}", i64::from(predicted));
+    println!("\nPredicted number of planets: {}\n", i64::from(predicted));
 }

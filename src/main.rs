@@ -13,7 +13,7 @@ const SEQ_LEN: usize = 500;
 fn main() {
     tch::manual_seed(42);
 
-    println!("Enter 1 to train, 2 to predict:");
+    println!("\nEnter 1 to train, 2 to predict:");
     let mut choice = String::new();
     io::stdin().read_line(&mut choice).unwrap();
     let choice = choice.trim();
@@ -29,7 +29,6 @@ fn main() {
         .map(|f| fs::read_to_string(f).unwrap().lines().count() - 1)
         .max()
         .unwrap_or(SEQ_LEN);
-    //println!("Using SEQ_LEN = {}", seq_len);
 
     match choice {
         "1" => {
