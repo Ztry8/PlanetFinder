@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlanetFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, ::after, ::before { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f2ec; --bg2: #edeae2; --panel: #ffffff;
+      --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.07);
+      --text: #1a1814; --muted: rgba(26,24,20,0.52); --dim: rgba(26,24,20,0.32);
+      --accent: #2952d4; --accent2: #1a3aaa;
+      --ok: #2a7a54; --err: #c0392b;
+      --serif: 'Fraunces', Georgia, serif;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; line-height: 1.6; }
+
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px 100px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(41,82,212,0.07) 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 80% 80%, rgba(200,97,26,0.05) 0%, transparent 60%); pointer-events: none; }
+    .badge { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; border: 1px solid rgba(41,82,212,0.25); color: var(--accent); padding: 5px 14px; margin-bottom: 28px; animation: rise 0.8s cubic-bezier(.16,1,.3,1) both; }
+    h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(3.5rem, 9vw, 7rem); letter-spacing: -.03em; line-height: 1; color: var(--text); animation: rise 0.8s cubic-bezier(.16,1,.3,1) 60ms both; }
+    h1 em { font-style: italic; color: var(--accent); }
+    .subtitle { margin-top: 20px; font-size: 16px; line-height: 1.8; max-width: 480px; color: var(--muted); animation: rise 0.8s cubic-bezier(.16,1,.3,1) 120ms both; }
+    .stats-row { display: flex; gap: 0; margin-top: 52px; border: 1px solid var(--border); background: var(--panel); animation: rise 0.8s cubic-bezier(.16,1,.3,1) 200ms both; }
+    .stat { padding: 20px 36px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--accent); display: block; }
+    .stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-top: 4px; }
+    @keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    section { padding: 96px 24px; max-width: 860px; margin: 0 auto; }
+    section + section { border-top: 1px solid var(--border2); }
+    .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -.025em; line-height: 1.1; color: var(--text); margin-bottom: 40px; }
+    h2 em { font-style: italic; color: var(--accent); }
+
+    .card { background: var(--panel); border: 1px solid var(--border); padding: 40px 44px 44px; }
+    .tabs { display: flex; border: 1px solid var(--border); width: fit-content; margin-bottom: 28px; }
+    .tab { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; padding: 8px 20px; background: none; border: none; cursor: pointer; color: var(--muted); transition: color .2s, background .2s; }
+    .tab + .tab { border-left: 1px solid var(--border); }
+    .tab.active { color: var(--accent); background: rgba(41,82,212,0.06); }
+    .col-header { display: grid; grid-template-columns: 1fr 1fr 32px; gap: 8px; margin-bottom: 6px; }
+    .col-header span { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+    .rows-list { display: flex; flex-direction: column; gap: 4px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr 32px; gap: 8px; align-items: center; }
+    .row input { width: 100%; font-family: var(--mono); font-size: 12.5px; font-weight: 300; background: var(--bg); border: 1px solid var(--border2); color: var(--text); padding: 7px 10px; outline: none; transition: border-color .2s; }
+    .row input:focus { border-color: var(--accent); }
+    .row input::placeholder { color: var(--dim); }
+    .del-btn { width: 32px; height: 32px; background: none; border: 1px solid var(--border2); color: var(--muted); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color .2s, color .2s; }
+    .del-btn:hover { border-color: var(--err); color: var(--err); }
+    .add-btn { margin-top: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; background: none; border: 1px dashed var(--border); color: var(--dim); padding: 8px 0; width: 100%; cursor: pointer; transition: border-color .2s, color .2s; }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .raw-label { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; display: block; }
+    textarea { width: 100%; min-height: 200px; font-family: var(--mono); font-size: 12.5px; font-weight: 300; background: var(--bg); border: 1px solid var(--border2); color: var(--text); line-height: 1.85; padding: 14px 16px; resize: vertical; outline: none; transition: border-color .2s; }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--dim); }
+    .hint { font-family: var(--mono); font-size: 10.5px; color: var(--dim); margin-top: 7px; }
+    .submit-btn { margin-top: 28px; width: 100%; background: var(--accent); border: none; color: #fff; font-family: var(--serif); font-size: 15px; font-weight: 600; font-style: italic; letter-spacing: .02em; padding: 14px 24px; cursor: pointer; position: relative; overflow: hidden; transition: background .2s, transform .1s; }
+    .submit-btn:hover { background: var(--accent2); }
+    .submit-btn:active { transform: scale(.998); }
+    .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .result { margin-top: 28px; padding: 24px 28px; border: 1px solid rgba(41,82,212,0.2); background: rgba(41,82,212,0.04); display: none; }
+    .result.show { display: block; animation: rise .4s both; }
+    .result-label { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+    .result-num { font-family: var(--serif); font-weight: 700; font-size: 4rem; line-height: 1; letter-spacing: -.03em; color: var(--accent); }
+    .result-sub { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+    .error { margin-top: 14px; font-family: var(--mono); font-size: 11.5px; color: var(--err); display: none; }
+    .error.show { display: block; }
+    .spin { display: inline-block; width: 11px; height: 11px; border: 1.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: rot .65s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes rot { to { transform: rotate(360deg); } }
+    #mode-cols { display: block; }
+    #mode-raw  { display: none; }
+
+    .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border2); border: 1px solid var(--border2); margin-bottom: 40px; }
+    .step { background: var(--panel); padding: 32px 28px; }
+    .step-num { font-family: var(--serif); font-size: 3rem; font-weight: 700; color: var(--accent); opacity: 0.18; line-height: 1; margin-bottom: 12px; }
+    .step h3 { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .step p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+    .arch-flow { display: flex; align-items: center; background: var(--panel); border: 1px solid var(--border); overflow: hidden; }
+    .arch-node { flex: 1; padding: 20px 16px; text-align: center; border-right: 1px solid var(--border2); }
+    .arch-node:last-child { border-right: none; }
+    .arch-node-label { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+    .arch-node-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+    .arch-arrow { font-size: 18px; color: var(--dim); padding: 0 4px; flex-shrink: 0; }
+
+    .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--border2); border: 1px solid var(--border2); }
+    .tech-item { background: var(--panel); padding: 24px 28px; display: flex; gap: 16px; align-items: flex-start; }
+    .tech-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .tech-item h4 { font-family: var(--mono); font-size: 13px; font-weight: 400; color: var(--text); margin-bottom: 4px; }
+    .tech-item p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .terminal { background: #1a1814; border: 1px solid var(--border); overflow: hidden; }
+    .terminal-bar { background: #2a2620; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+    .terminal-name { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.3); margin-left: 8px; }
+    .terminal-body { padding: 24px 28px; font-family: var(--mono); font-size: 13px; line-height: 2; color: rgba(255,255,255,.75); }
+    .t-cmd { color: #7ec8a4; } .t-ok { color: #7ec8a4; } .t-transit { color: #febc2e; }
+    .t-result { color: #5b8fff; font-weight: 400; } .t-prompt { color: rgba(255,255,255,.35); }
+
+    .github-section { padding: 0 24px 96px; max-width: 860px; margin: 0 auto; }
+    .github-block { border: 1px solid var(--border); background: var(--panel); overflow: hidden; }
+    .github-top { padding: 56px 60px; display: flex; align-items: center; text-align: center; justify-content: center; gap: 40px; border-bottom: 1px solid var(--border2); }
+    .github-wordmark { font-family: var(--serif); font-weight: 700; font-size: clamp(3rem, 8vw, 6.5rem); letter-spacing: -.04em; line-height: 1; color: var(--text); }
+    .github-wordmark span { color: var(--accent); font-style: italic; }
+    .github-url { border-bottom: 2px solid var(--accent); transition: color .2s, border-color .2s; font-weight: 700; font-size: clamp(2.5rem, 1.5vw, 6.5rem); letter-spacing: -.04em; line-height: 1; text-align: center; font-family: var(--mono); color: var(--accent); text-decoration: none; padding-bottom: 2px; transition: border-color .2s; white-space: nowrap; }
+    .github-url:hover { border-color: var(--accent2); color: var(--accent2); }
+    .github-tags { display: flex; }
+    .github-tag { flex: 1; padding: 16px 24px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); border-right: 1px solid var(--border2); text-align: center; }
+    .github-tag:last-child { border-right: none; }
+
+    .features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: var(--border2); border: 1px solid var(--border2); }
+    .feature { background: var(--panel); padding: 28px 24px; }
+    .feature-icon { font-size: 20px; margin-bottom: 12px; }
+    .feature h4 { font-family: var(--serif); font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .feature p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    .credit { padding: 56px 0 0; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+    .credit a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(41,82,212,0.25); padding-bottom: 1px; }
+    .credit a:hover { border-color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .stats-row { flex-direction: column; }
+      .stat { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat:last-child { border-bottom: none; }
+      .steps, .tech-grid { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr 1fr; }
+      .arch-flow { flex-direction: column; }
+      .arch-node { border-right: none; border-bottom: 1px solid var(--border2); }
+      .github-top { flex-direction: column; gap: 20px; }
+      .github-tags { flex-wrap: wrap; }
+      .github-tag { flex: 1 1 50%; }
+      .card { padding: 28px 22px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">Нейросетевой детектор экзопланет</div>
+  <h1>Planet<em>Finder</em></h1>
+  <p class="subtitle">Введите данные фотометрической кривой блеска — поток и время — и модель определит число планет на орбите звезды.</p>
+  <div class="stats-row">
+    <div class="stat"><span class="stat-num">5 000+</span><span class="stat-label">звёзд в датасете</span></div>
+    <div class="stat"><span class="stat-num">&lt;10 мс</span><span class="stat-label">предсказание</span></div>
+  </div>
+</div>
+
+<section>
+  <div class="section-label">01 · Анализ</div>
+  <h2>Введите данные<br><em>кривой блеска</em></h2>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="setMode('cols')">По столбцам</button>
+      <button class="tab" onclick="setMode('raw')">Raw</button>
+    </div>
+    <div id="mode-cols">
+      <div class="col-header"><span>Поток</span><span>Время</span><span></span></div>
+      <div class="rows-list" id="rowsList"></div>
+      <button class="add-btn" onclick="addRow()">+ добавить точку</button>
+    </div>
+    <div id="mode-raw">
+      <span class="raw-label">Данные кривой блеска</span>
+      <textarea id="rawInput" spellcheck="false" placeholder="0.9984 131.20&#10;0.9991 131.45&#10;0.9978 131.70&#10;..."></textarea>
+      <p class="hint">Каждая строка: поток&ensp;время</p>
+    </div>
+    <button class="submit-btn" id="submitBtn" onclick="analyze()">Анализировать</button>
+    <div class="error" id="errEl"></div>
+    <div class="result" id="resultEl">
+      <div class="result-label">Обнаружено планет</div>
+      <div class="result-num" id="resultNum">—</div>
+      <div class="result-sub" id="resultSub"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">02 · Метод</div>
+  <h2>Транзитная фотометрия<br><em>+ LSTM</em></h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><h3>Данные NASA</h3><p>lightkurve загружает кривые блеска Kepler/TESS. Нормализация, удаление NaN, фильтрация шума.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>Предобработка</h3><p>Нормализация яркости и времени в диапазон [0, 1]. Сохранение подготовленных данных в learn*.txt.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>Обучение LSTM</h3><p>Rust + tch-rs обучает рекуррентную сеть. Автосохранение лучшей модели в model.ot по MSE.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Предсказание</h3><p>Ввод кривой → LSTM слои памяти → Linear hidden→1 → число планет. Менее 10 мс.</p></div>
+  </div>
+  <div class="arch-flow">
+    <div class="arch-node"><div class="arch-node-label">Вход</div><div class="arch-node-val">[brightness, time]</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="arch-node-label">LSTM</div><div class="arch-node-val">слои памяти</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="arch-node-label">Linear</div><div class="arch-node-val">hidden → 1</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="arch-node-label">Выход</div><div class="arch-node-val">N планет</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">03 · Технологии</div>
+  <h2>Стек под<br><em>капотом</em></h2>
+  <div class="tech-grid">
+    <div class="tech-item"><div class="tech-dot" style="background:#9b59b6"></div><div><h4>Rust 1.70+</h4><p>Основной язык — максимальная скорость и безопасность памяти без GC.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#3498db"></div><div><h4>tch-rs / LibTorch</h4><p>PyTorch C++ API — LSTM, тензорные операции, автодифференцирование.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#e67e22"></div><div><h4>NASA lightkurve</h4><p>Загрузка и обработка данных Kepler/TESS через Python-пайплайн.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#2ecc71"></div><div><h4>CUDA (опционально)</h4><p>GPU-ускорение обучения и инференса до ×10 на совместимых картах.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#e74c3c"></div><div><h4>Apache 2.0</h4><p>Открытый исходный код, свободное коммерческое использование.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#1a1814"></div><div><h4>LSTM — Long Short-Term Memory</h4><p>Захватывает транзитные паттерны, разнесённые на недели и месяцы. Устойчива к шуму реальных данных.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-label">04 · MVP</div>
+  <h2>Рабочий прототип<br><em>уже готов</em></h2>
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <span class="terminal-name">PlanetFinder — Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-cmd">$ cargo run --release</span></div>
+      <div><span class="t-ok">   Compiling</span> planetfinder v1.0.1</div>
+      <div><span class="t-ok">   Finished</span> [optimized] target(s)</div>
+      <div>&nbsp;</div>
+      <div><span class="t-prompt">&gt;&gt;</span> Режим (1=обучение, 2=предсказание): <span style="color:#fff">2</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:rgba(255,255,255,.4)">Загружена модель: model.ot</span></div>
+      <div><span class="t-prompt">&gt;&gt;</span> Вводите 'яркость время'. end = результат</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;0.998&nbsp;&nbsp;131.2</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-transit">0.872&nbsp;&nbsp;134.8&nbsp;&nbsp;&nbsp;&lt;- транзит!</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;0.999&nbsp;&nbsp;136.6</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;end</div>
+      <div>&nbsp;</div>
+      <div><span class="t-prompt">&gt;&gt;</span> <span class="t-result">Predicted number of planets: 1</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="github-section">
+  <div class="section-label" style="margin-bottom:16px;">05 · Исходный код</div>
+  <div class="github-block">
+    <div class="github-top">
+        <a class="github-url" href="https://github.com/Ztry8/PlanetFinder" target="_blank">github.com/Ztry8/PlanetFinder</a>
+    </div>
+    <div class="github-tags">
+      <div class="github-tag">Rust</div>
+      <div class="github-tag">LSTM</div>
+      <div class="github-tag">NASA</div>
+      <div class="github-tag">Apache 2.0</div>
+      <div class="github-tag">Open Source</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let mode="cols",rowCount=0;function setMode(e){mode=e,document.querySelectorAll(".tab").forEach(((t,n)=>{t.classList.toggle("active",0===n&&"cols"===e||1===n&&"raw"===e)})),document.getElementById("mode-cols").style.display="cols"===e?"block":"none",document.getElementById("mode-raw").style.display="raw"===e?"block":"none",hideAll()}function addRow(e="",t=""){const n=++rowCount,o=document.getElementById("rowsList"),l=document.createElement("div");l.className="row",l.id="row-"+n,l.innerHTML=`<input type="number" step="any" placeholder="0.9984" value="${e}" /><input type="number" step="any" placeholder="131.20" value="${t}" /><button class="del-btn" onclick="delRow(${n})" title="Удалить">×</button>`,o.appendChild(l),l.querySelector("input").focus()}function delRow(e){const t=document.getElementById("row-"+e);t&&t.remove()}function collectPoints(){if("cols"===mode){const e=document.querySelectorAll("#rowsList .row"),t=[];for(const n of e){const e=n.querySelectorAll("input"),o=e[0].value.trim(),l=e[1].value.trim();if(o||l){if(!o||!l||isNaN(o)||isNaN(l))throw new Error("Заполните все поля строки (поток и время)");t.push({flux:parseFloat(o),time:parseFloat(l)})}}return t}{const e=document.getElementById("rawInput").value.trim();if(!e)throw new Error("Вставьте данные в поле");const t=[];for(const n of e.split("\n")){const e=n.trim();if(!e)continue;const o=e.split(/\s+/);if(2!==o.length||isNaN(o[0])||isNaN(o[1]))throw new Error(`Ошибка в строке: "${e}" — ожидается «поток время»`);t.push({flux:parseFloat(o[0]),time:parseFloat(o[1])})}return t}}function hideAll(){document.getElementById("errEl").className="error",document.getElementById("resultEl").className="result"}function showErr(e){const t=document.getElementById("errEl");t.textContent="⚠ "+e,t.className="error show"}async function analyze(){hideAll();const e=document.getElementById("submitBtn");let t;try{t=collectPoints()}catch(e){return void showErr(e.message)}if(0!==t.length){e.disabled=!0,e.innerHTML='<span class="spin"></span>Анализ...';try{const e=await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({points:t})});if(429===e.status)return void showErr("Слишком много запросов — подождите немного.");if(!e.ok)return void showErr(await e.text()||"Ошибка сервера");const n=await e.json();document.getElementById("resultNum").textContent=n.planets,document.getElementById("resultSub").textContent=`по ${t.length} точк${plural(t.length)} наблюдений`,document.getElementById("resultEl").className="result show"}catch{showErr("Не удалось подключиться к серверу")}finally{e.disabled=!1,e.innerHTML="Анализировать"}}else showErr("Добавьте хотя бы одну точку")}function plural(e){return e%10==1&&e%100!=11?"е":([2,3,4].includes(e%10)&&[12,13,14].includes(e%100),"ам")}addRow(),addRow(),addRow();
+</script>
+<script>
+  window.addEventListener('load', () => {
+  window.scrollTo({
+      top: 0,
+    });
+  });
+</script>
+</body>
+</html>
