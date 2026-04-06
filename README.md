@@ -2,10 +2,10 @@
 
 # PlanetFinder
 
-## [🇷🇺 Russian version here](https://github.com/Ztry8/PlanetFinder/blob/main/README_RU.md)
+## [Online Demo](https://planetfinder.online)
 
 ### A neural network for exoplanet detection from stellar light curves
-### [Online Demo](https://planetfinder.online)
+### [🇷🇺 Russian version here](https://github.com/Ztry8/PlanetFinder/blob/main/README_RU.md)
 
 [![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
 [![CUDA](https://img.shields.io/badge/CUDA-optional-76b900?style=for-the-badge&logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)

@@ -2,10 +2,10 @@
 
 # PlanetFinder
 
-## [🇬🇧 English version here](https://github.com/Ztry8/PlanetFinder/#planetfinder)
+## [Онлайн демо](https://planetfinder.online)
 
 ### Нейронная сеть для обнаружения экзопланет по кривым блеска звёзд
-### [Онлайн демо](https://planetfinder.online)
+### [🇬🇧 English version here](https://github.com/Ztry8/PlanetFinder/#planetfinder)
 
 [![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
 [![CUDA](https://img.shields.io/badge/CUDA-optional-76b900?style=for-the-badge&logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
