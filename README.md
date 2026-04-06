@@ -2,8 +2,10 @@
 
 # PlanetFinder
 
-### Нейронная сеть для обнаружения экзопланет по кривым блеска звёзд
-### [Онлайн демо](https://planetfinder.online)
+## [🇷🇺 Russian version here](https://github.com/Ztry8/PlanetFinder/blob/main/README_RU.md)
+
+### A neural network for exoplanet detection from stellar light curves
+### [Online Demo](https://planetfinder.online)
 
 [![Rust](https://img.shields.io/badge/Rust-1.70%2B-orange?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
 [![CUDA](https://img.shields.io/badge/CUDA-optional-76b900?style=for-the-badge&logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
@@ -13,223 +15,223 @@
 
 ---
 
-## Описание
+## Description
 
-**PlanetFinder** — быстрая кроссплатформенная система машинного обучения, написанная на **Rust**, которая обнаруживает экзопланеты методом транзита: анализируя колебания яркости звезды во времени (кривые блеска), нейронная сеть предсказывает количество планет в звёздной системе.
+**PlanetFinder** is a fast, cross-platform machine learning system written in **Rust** that detects exoplanets using the transit method: by analyzing fluctuations in a star's brightness over time (light curves), the neural network predicts the number of planets in a stellar system.
 
-Проект использует реальные астрономические данные миссий **NASA Kepler** и **TESS**, предоставляемые через Python-библиотеку `lightkurve`.
+The project uses real astronomical data from the **NASA Kepler** and **TESS** missions, accessed through the Python library `lightkurve`.
 
-### Зачем это нужно?
+### Why does this exist?
 
-**С астрономической точки зрения** — позволяет автоматически анализировать миллионы кривых блеска, которые невозможно обработать вручную, ускоряет поиск кандидатов в экзопланеты и помогает проверять гипотезы о транзитных маршрутах и орбитальных периодах.
+**From an astronomical perspective** — it enables automatic analysis of millions of light curves that cannot be processed manually, accelerates the search for exoplanet candidates, and helps test hypotheses about transit paths and orbital periods.
 
-**С точки зрения разработки** — практический пример применения LSTM для анализа временных рядов на Rust, демонстрация работы с реальными научными данными NASA и кроссплатформенный проект с опциональным GPU-ускорением через CUDA.
+**From a development perspective** — it is a practical example of applying LSTM to time-series analysis in Rust, a demonstration of working with real NASA scientific data, and a cross-platform project with optional GPU acceleration via CUDA.
 
 ---
 
-## Как это работает
+## How it works
 
-Метод, который использует PlanetFinder, называется **транзитной фотометрией**. Когда планета проходит перед своей звездой, она блокирует часть её света — яркость звезды незначительно падает. По глубине, форме и периодичности этих провалов можно определить количество планет.
+The method used by PlanetFinder is called **transit photometry**. When a planet passes in front of its star, it blocks some of the star's light — the star's brightness drops slightly. The number of planets can be determined from the depth, shape, and periodicity of these dips.
 
 ```
-  Яркость звезды
+  Star brightness
   │
   │████████████████████████████████████████████████
-  │                        ↓ транзит планеты
+  │                        ↓ planet transit
   │████████████████████████    ████████████████████
   │                       ░░░░░
-  └──────────────────────────────────────────────▶ Время
-                            └─ падение яркости ~1%
+  └──────────────────────────────────────────────▶ Time
+                            └─ brightness drop ~1%
 ```
 
-**Пайплайн обработки данных:**
+**Data processing pipeline:**
 
 ```
-  Данные NASA (Kepler/TESS)
+  NASA data (Kepler/TESS)
           │
           ▼
     download_data.py
-    ├── Загрузка кривых блеска через lightkurve
-    ├── Нормализация яркости
-    ├── Удаление выбросов и NaN
-    └── Сохранение в learn*.txt
+    ├── Downloading light curves via lightkurve
+    ├── Brightness normalization
+    ├── Removing outliers and NaNs
+    └── Saving to learn*.txt
           │
           ▼
     PlanetFinder (Rust)
-    ├── Парсинг .txt файлов
-    ├── Нормализация времени [0..1]
-    ├── Формирование тензоров
-    └── LSTM → Linear → Предсказание
+    ├── Parsing .txt files
+    ├── Time normalization [0..1]
+    ├── Building tensors
+    └── LSTM → Linear → Prediction
           │
           ▼
-    Результат: N планет в системе
+    Result: N planets in the system
 ```
 
 ---
 
-## Архитектура нейронной сети
+## Neural network architecture
 
-PlanetFinder использует **LSTM (Long Short-Term Memory)** — рекуррентную нейронную сеть, специально разработанную для работы с последовательностями и временными рядами.
+PlanetFinder uses **LSTM (Long Short-Term Memory)** — a recurrent neural network specifically designed to work with sequences and time series.
 
 ```
-Входная последовательность (кривая блеска)
-[яркость₁, время₁] → [яркость₂, время₂] → ... → [яркостьₙ, временₙ]
+Input sequence (light curve)
+[brightness₁, time₁] → [brightness₂, time₂] → ... → [brightnessₙ, timeₙ]
          │
          ▼
 ┌─────────────────────────────────────────────────┐
-│             LSTM Layer (скрытые состояния)       │
+│             LSTM Layer (hidden states)           │
 │   ┌──────┐     ┌──────┐           ┌──────┐      │
 │   │ LSTM │ ──▶ │ LSTM │ ── ... ──▶│ LSTM │      │
-│   │ячейка│     │ячейка│           │ячейка│      │
+│   │ cell │     │ cell │           │ cell │      │
 │   └──────┘     └──────┘           └──┬───┘      │
 │      ↑              ↑                │           │
-│  [br₁,t₁]      [br₂,t₂]      последнее         │
-│                               состояние          │
+│  [br₁,t₁]      [br₂,t₂]         last           │
+│                               hidden state       │
 └─────────────────────────────────────────────────┘
          │
-         ▼  (последнее скрытое состояние hₙ)
+         ▼  (last hidden state hₙ)
 ┌─────────────────────────────────────────────────┐
 │         Fully Connected Layer (Linear)           │
 │              hidden_size → 1                     │
 └─────────────────────────────────────────────────┘
          │
          ▼
-  Число планет (f64 → округляется до целого)
+  Number of planets (f64 → rounded to integer)
 ```
 
-**Почему LSTM, а не простая RNN или CNN?**
+**Why LSTM and not a simple RNN or CNN?**
 
-LSTM решает проблему затухающего градиента и способна "запоминать" паттерны, разнесённые во времени — в данном случае периодические транзиты, которые могут происходить раз в несколько недель или месяцев. CNN хорошо ловит локальные паттерны, но хуже справляется с долгосрочными зависимостями.
+LSTM solves the vanishing gradient problem and is capable of "remembering" patterns that are spread across time — in this case, periodic transits that may occur once every few weeks or months. CNNs are good at detecting local patterns but handle long-range dependencies less effectively.
 
-**Ключевые параметры модели:**
+**Key model parameters:**
 
-| Параметр | Значение | Описание |
+| Parameter | Value | Description |
 |----------|----------|----------|
-| `input_size` | 2 | Яркость + Время на каждый шаг |
-| `output_size` | 1 | Предсказанное число планет |
-| Функция потерь | MSE | Среднеквадратичная ошибка |
-| Оптимизатор | Adam | Адаптивная оптимизация |
-| Прогресс-репорт | каждые 2.5% эпох | Вывод текущей ошибки |
+| `input_size` | 2 | Brightness + Time per step |
+| `output_size` | 1 | Predicted number of planets |
+| Loss function | MSE | Mean Squared Error |
+| Optimizer | Adam | Adaptive optimization |
+| Progress report | every 2.5% of epochs | Outputs current loss |
 
 ---
 
-## Структура проекта
+## Project structure
 
 ```
 PlanetFinder/
 │
-├── src/                    # Исходный код на Rust
-│   └── main.rs             # Точка входа и CLI
-│   └── data.rs             # Утилита для чтения learn файлов
-│   └── ai.rs               # Обучение и предсказание нейросети
-│   └── web.rs              # Веб-сервер
+├── src/                    # Rust source code
+│   └── main.rs             # Entry point and CLI
+│   └── data.rs             # Utility for reading learn files
+│   └── ai.rs               # Neural network training and prediction
+│   └── web.rs              # Web server
 │
-├── download_data.py        # Python-скрипт загрузки данных NASA
+├── download_data.py        # Python script for downloading NASA data
 │
-├── Cargo.toml              # Зависимости и метаданные Rust-пакета
-├── .gitignore              # Исключения для Git
+├── Cargo.toml              # Rust package dependencies and metadata
+├── .gitignore              # Git exclusions
 │
-├── model.ot                # Сохранённая модель (создаётся после обучения)
-├── learn1.txt              # Обучающий файл 1 (создаётся download_data.py)
-├── learn2.txt              # Обучающий файл 2
-├── ...                     # learnN.txt — столько, сколько загрузите
+├── model.ot                # Saved model (created after training)
+├── learn1.txt              # Training file 1 (created by download_data.py)
+├── learn2.txt              # Training file 2
+├── ...                     # learnN.txt — as many as you download
 │
-├── README.md               # Этот файл
+├── README.md               # This file
 └── LICENSE                 # Apache 2.0
-└── PitchDeck.pdf           # Презентация
+└── PitchDeck.pdf           # Presentation
 ```
 
 ---
 
-## Разбор кода
+## Code overview
 
-### `src/main.rs` — Точка входа и CLI
+### `src/main.rs` — Entry point and CLI
 
-Реализует интерактивный текстовый интерфейс. Пользователь выбирает режим работы через аргументы.    
-`train` — обучение, `predict` — предсказание, `web <порт>` — запуск веб-сервера.
+Implements an interactive text interface. The user selects the operating mode via arguments.
+`train` — training, `predict` — prediction, `web <port>` — starting the web server.
 
-### `src/data.rs` — Утилита для чтения learn файлов
+### `src/data.rs` — Utility for reading learn files
 
-Читает и возращает удобный для программы формат данных файлов обучения.
+Reads and returns training file data in a convenient format for the program.
 
-### `src/ai.rs` — Обучение и предсказание нейросети
+### `src/ai.rs` — Neural network training and prediction
 
-В режиме **обучения** программа:
-1. Сканирует директорию на наличие файлов `learn*.txt`
-2. Парсит каждый файл: читает пары `(яркость, время)` и метку `result N`
-3. Нормализует яркость (делением на среднее) и время (в диапазон `[0, 1]`)
-4. Формирует тензоры и запускает цикл обучения
-5. Каждые 2.5% эпох выводит прогресс и текущую ошибку MSE
-6. Автоматически сохраняет `model.ot` при достижении минимальной ошибки
+In **training** mode, the program:
+1. Scans the directory for `learn*.txt` files
+2. Parses each file: reads `(brightness, time)` pairs and the `result N` label
+3. Normalizes brightness (by dividing by the mean) and time (to the range `[0, 1]`)
+4. Builds tensors and starts the training loop
+5. Prints progress and the current MSE loss every 2.5% of epochs
+6. Automatically saves `model.ot` when the minimum loss is achieved
 
-В режиме **предсказания** программа:
-1. Загружает `model.ot` с диска
-2. Принимает пары `(яркость, время)` из стандартного ввода до команды `end`
-3. Прогоняет последовательность через LSTM и выводит предсказание
+In **prediction** mode, the program:
+1. Loads `model.ot` from disk
+2. Accepts `(brightness, time)` pairs from standard input until the `end` command
+3. Runs the sequence through the LSTM and outputs the prediction
 
-### `src/web.rs` — Веб-сервер
+### `src/web.rs` — Web server
 
-В режиме **веб-сервера** программа:
-1. Загружает `model.ot` с диска
-2. Запускает сервер для веб-сайта доступного с адреса `http://localhost:{указанный порт}`
+In **web server** mode, the program:
+1. Loads `model.ot` from disk
+2. Starts a server for a website accessible at `http://localhost:{specified port}`
 
-### `download_data.py` — Загрузка данных NASA
+### `download_data.py` — Downloading NASA data
 
-Python-скрипт, использующий библиотеку `lightkurve` для доступа к архивам Kepler и TESS. Загружает кривые блеска звёзд с известным числом планет и конвертирует их в формат, понятный PlanetFinder.
+A Python script using the `lightkurve` library to access Kepler and TESS archives. It downloads light curves of stars with a known number of planets and converts them to a format understood by PlanetFinder.
 
-### `Cargo.toml` — Зависимости Rust
+### `Cargo.toml` — Rust dependencies
 
-Одна из ключевых зависимость проекта — `tch` (rust-биндинги к LibTorch, C++ API PyTorch). Именно через неё реализуются тензорные операции, LSTM-слой и сохранение/загрузка модели в формате `.ot`.
-Веб-сервер построен на базе Rust фреймворка `actix-web`.
+One of the project's key dependencies is `tch` (Rust bindings to LibTorch, the C++ API of PyTorch). It is used to implement tensor operations, the LSTM layer, and saving/loading the model in `.ot` format.
+The web server is built on top of the Rust framework `actix-web`.
 
 ---
 
-## Формат данных
+## Data format
 
-Каждый обучающий файл имеет имя `learn1.txt`, `learn2.txt`, ... и следующую структуру:
+Each training file is named `learn1.txt`, `learn2.txt`, ... and has the following structure:
 
 ```
 0.998 131.2
 1.002 132.1
 0.995 133.0
 0.999 133.9
-0.872 134.8    ← транзит: яркость упала
-0.870 135.7    ← транзит: продолжается
+0.872 134.8    ← transit: brightness dropped
+0.870 135.7    ← transit: continues
 0.998 136.6
 ...
-result 2       ← метка: 2 планеты в системе
+result 2       ← label: 2 planets in the system
 ```
 
-| Поле | Тип | Описание |
+| Field | Type | Description |
 |------|-----|----------|
-| `яркость` | `f64` | Нормализованная яркость звезды (≈ 1.0 в норме) |
-| `время` | `f64` | Момент наблюдения (BJD или произвольные единицы) |
-| `result N` | строка | Последняя строка — число известных планет |
+| `brightness` | `f64` | Normalized stellar brightness (≈ 1.0 under normal conditions) |
+| `time` | `f64` | Observation timestamp (BJD or arbitrary units) |
+| `result N` | string | Last line — number of known planets |
 
-> **Важно:** файлы должны называться строго `learnN.txt` (например, `learn1.txt`, `learn42.txt`). Программа находит их автоматически по шаблону `learn*.txt`.
+> **Important:** files must be named strictly `learnN.txt` (e.g., `learn1.txt`, `learn42.txt`). The program finds them automatically using the pattern `learn*.txt`.
 
 ---
 
-## Требования
+## Requirements
 
-> Вы можете так-же попробовать [нейросеть онлайн](https://planetfinder.online), без локальной установки
+> You can also try the [neural network online](https://planetfinder.online), without a local installation.
 
-### Обязательные
+### Required
 
-| Компонент | Версия | Где взять |
+| Component | Version | Where to get |
 |-----------|--------|-----------|
 | **Rust** | 1.70+ | [rustup.rs](https://rustup.rs/) |
 | **LibTorch** | 2.x | [pytorch.org](https://pytorch.org/get-started/locally/) |
 
-### Опциональные
+### Optional
 
-| Компонент | Назначение | Где взять |
+| Component | Purpose | Where to get |
 |-----------|-----------|-----------|
-| **CUDA** 11.x+ | GPU-ускорение обучения | [developer.nvidia.com](https://developer.nvidia.com/cuda-toolkit) |
-| **Python 3.8+** | Только для `download_data.py` | [python.org](https://python.org) |
-| **lightkurve, astropy, numpy** | Загрузка данных NASA | `pip3 install lightkurve astropy numpy` |
+| **CUDA** 11.x+ | GPU-accelerated training | [developer.nvidia.com](https://developer.nvidia.com/cuda-toolkit) |
+| **Python 3.8+** | Only for `download_data.py` | [python.org](https://python.org) |
+| **lightkurve, astropy, numpy** | Downloading NASA data | `pip3 install lightkurve astropy numpy` |
 
-### Переменная окружения для LibTorch
+### LibTorch environment variable
 
 ```bash
 # Linux / macOS
@@ -243,75 +245,75 @@ $env:Path = "$env:LIBTORCH\lib;$env:Path"
 
 ---
 
-## Установка
+## Installation
 
-### Шаг 1. Установите Rust
+### Step 1. Install Rust
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
-rustc --version   # должно вывести: rustc 1.70.0 или выше
+rustc --version   # should output: rustc 1.70.0 or higher
 ```
 
-### Шаг 2. Скачайте LibTorch
+### Step 2. Download LibTorch
 
-Перейдите на [pytorch.org/get-started/locally](https://pytorch.org/get-started/locally/), выберите:
+Go to [pytorch.org/get-started/locally](https://pytorch.org/get-started/locally/), select:
 - **Package:** LibTorch
 - **Language:** C++
-- **OS:** ваша ОС
-- **CUDA:** нужная версия (или CPU-only)
+- **OS:** your OS
+- **CUDA:** the version you need (or CPU-only)
 
-Распакуйте архив и задайте переменную `LIBTORCH` (см. выше).
+Extract the archive and set the `LIBTORCH` variable (see above).
 
-### Шаг 3. Клонируйте репозиторий
+### Step 3. Clone the repository
 
 ```bash
 git clone https://github.com/Ztry8/PlanetFinder.git
 cd PlanetFinder
 ```
 
-### Шаг 4. Соберите проект
+### Step 4. Build the project
 
 ```bash
 cargo build --release
 ```
 
-> Первая сборка занимает несколько минут из-за компиляции зависимостей. Последующие — значительно быстрее. Готовый бинарник появится в `target/release/`.
+> The first build takes several minutes due to dependency compilation. Subsequent builds are significantly faster. The compiled binary will appear in `target/release/`.
 
 ---
 
-## Загрузка данных NASA
+## Downloading NASA data
 
-### Через скрипт (рекомендуется)
+### Via the script (recommended)
 
 ```bash
 pip3 install lightkurve astropy numpy
 python3 download_data.py
 ```
 
-Скрипт загрузит кривые блеска из архива Kepler/TESS и сохранит их как `learn_1.txt`, `learn_2.txt`, ... в рабочую папку.
+The script will download light curves from the Kepler/TESS archive and save them as `learn1.txt`, `learn2.txt`, ... in the working directory.
 
-### Готовые данные из релиза
+### Pre-built data from the release
 
-Если нет доступа к Python или вы хотите начать немедленно — скачайте готовые `.txt` файлы и предобученную модель `model.ot`:
+If you don't have Python access or want to get started immediately — download the ready-made `.txt` files and the pre-trained `model.ot`:
 
-**[Скачать готовые файлы → Releases v1.0.1](https://github.com/Ztry8/PlanetFinder/releases/tag/v1.0.1)**
+**[Download ready-made files → Releases v1.0.1](https://github.com/Ztry8/PlanetFinder/releases/tag/v1.0.1)**
 
-Поместите скачанные файлы в корневую директорию проекта.
+Place the downloaded files in the project's root directory.
 
 ---
 
-## Использование
+## Usage
 
 ```bash
-cargo run --release <режим работы>
+cargo run --release <mode>
 ```
 
-### Режим 1: Обучение модели
+### Mode 1: Training the model
 
 ```
-Найдено обучающих файлов: 42
-Начинаем обучение...
+Found training files: 42
+Starting training...
 
 Completed   50 epochs ( 2.5% done) — current error: 1.2885
 Completed  100 epochs ( 5.0% done) — current error: 0.9341
@@ -319,17 +321,17 @@ Completed  150 epochs ( 7.5% done) — current error: 0.7102
 ...
 Completed 2000 epochs (100.0% done) — current error: 0.0487
 
-Лучшая модель сохранена: model.ot
+Best model saved: model.ot
 ```
 
-Программа автоматически находит все файлы `learn*.txt`, обучает LSTM и сохраняет лучшие веса в `model.ot`.
+The program automatically finds all `learn*.txt` files, trains the LSTM, and saves the best weights to `model.ot`.
 
-### Режим 2: Предсказание
+### Mode 2: Prediction
 
 ```
-Загружена модель: model.ot
-Вводите пары "яркость время", по одной на строку.
-Введите "end" для получения результата.
+Model loaded: model.ot
+Enter "brightness time" pairs, one per line.
+Enter "end" to get the result.
 
 > 0.998 131.2
 > 1.002 132.1
@@ -341,35 +343,35 @@ Completed 2000 epochs (100.0% done) — current error: 0.0487
 Predicted number of planets: 1
 ```
 
-> Для предсказания файл `model.ot` должен быть в рабочей директории. Либо обучите модель (режим 1), либо скачайте готовую из релиза.
+> For prediction, the `model.ot` file must be in the working directory. Either train the model (mode 1) or download the pre-trained one from the release.
 
 ---
 
-## Примеры обучающих файлов
+## Training file examples
 
-### Горячий юпитер (1 планета, глубокий транзит)
+### Hot Jupiter (1 planet, deep transit)
 
 ```
-# Большая планета, орбита ~3 дня
+# Large planet, orbit ~3 days
 1.001 0.0
 1.000 0.5
-0.830 1.0    ← транзит: -17% яркости
+0.830 1.0    ← transit: -17% brightness
 0.829 1.5
 0.831 2.0
 1.000 2.5
-0.829 4.0    ← повторный транзит, тот же период
+0.829 4.0    ← repeated transit, same period
 result 1
 ```
 
-### Многопланетная система (2 планеты)
+### Multi-planet system (2 planets)
 
 ```
-# Малый транзит (период ~5 дней) + крупный (период ~18 дней)
+# Small transit (period ~5 days) + large transit (period ~18 days)
 1.000 0.0
-0.991 5.3    ← маленькая планета (-0.9%)
+0.991 5.3    ← small planet (-0.9%)
 1.001 10.6
 0.992 15.9
-0.870 18.2   ← большая планета (-13%)
+0.870 18.2   ← large planet (-13%)
 1.000 21.2
 0.991 26.5
 result 2
@@ -377,61 +379,61 @@ result 2
 
 ---
 
-## Производительность
+## Performance
 
-| Режим | Конфигурация | Скорость |
+| Mode | Configuration | Speed |
 |-------|-------------|---------|
-| Обучение | CPU (Intel i7) | ~200 эпох/сек |
-| Обучение | GPU (RTX 3060, CUDA) | ~2000 эпох/сек |
-| Предсказание | CPU или GPU | < 10 мс |
+| Training | CPU (Intel i7) | ~200 epochs/sec |
+| Training | GPU (RTX 3060, CUDA) | ~2000 epochs/sec |
+| Prediction | CPU or GPU | < 10 ms |
 
-Точность зависит от числа обучающих файлов (рекомендуется 50+), их разнообразия и числа эпох.
+Accuracy depends on the number of training files (50+ recommended), their diversity, and the number of epochs.
 
 ---
 
 ## FAQ
 
-**Q: Могу ли я использовать свои данные, не из NASA?**  
-A: Да. Любые данные в формате `яркость время` построчно, с завершающей строкой `result N`, будут приняты программой.
+**Q: Can I use my own data, not from NASA?**
+A: Yes. Any data in the format `brightness time` line by line, with a closing line `result N`, will be accepted by the program.
 
-**Q: Зачем нужна нормализация?**  
-A: Разные звёзды имеют разную базовую яркость. Нормализация приводит все кривые к единому масштабу, позволяя модели учиться на паттернах транзитов, а не абсолютных значениях.
+**Q: Why is normalization necessary?**
+A: Different stars have different baseline brightness levels. Normalization brings all curves to a common scale, allowing the model to learn from transit patterns rather than absolute values.
 
-**Q: Как долго нужно обучать модель?**  
-A: Для 50 файлов на CPU — около 15–30 минут при 2000 эпохах. С GPU — в ~10 раз быстрее.
+**Q: How long does the model need to train?**
+A: For 50 files on CPU — approximately 15–30 minutes at 2000 epochs. With GPU — roughly 10 times faster.
 
-**Q: Работает ли проект на Apple Silicon (M1/M2/M3)?**  
-A: Да, в CPU-режиме. Поддержка Metal/MPS зависит от версии LibTorch.
+**Q: Does the project work on Apple Silicon (M1/M2/M3)?**
+A: Yes, in CPU mode. Metal/MPS support depends on the LibTorch version.
 
-**Q: Почему Rust, а не Python?**  
-A: Rust обеспечивает высокую скорость выполнения, безопасность памяти без GC и возможность компилировать в единый бинарник без зависимостей от интерпретатора.
+**Q: Why Rust and not Python?**
+A: Rust provides high execution speed, memory safety without a GC, and the ability to compile into a single binary without dependencies on an interpreter.
 
 ---
 
-## Источники и литература
+## Sources and references
 
-### Данные
+### Data
 
-| Источник | Описание | Ссылка |
+| Source | Description | Link |
 |---------|----------|--------|
-| **NASA Kepler** | Главный источник кривых блеска | [nasa.gov/kepler](https://www.nasa.gov/mission_pages/kepler/main/index.html) |
-| **NASA TESS** | Расширенный обзор транзитных экзопланет | [tess.mit.edu](https://tess.mit.edu/) |
-| **NASA Exoplanet Archive** | Каталог подтверждённых экзопланет | [exoplanetarchive.ipac.caltech.edu](https://exoplanetarchive.ipac.caltech.edu/) |
+| **NASA Kepler** | Primary source of light curves | [nasa.gov/kepler](https://www.nasa.gov/mission_pages/kepler/main/index.html) |
+| **NASA TESS** | Extended survey of transiting exoplanets | [tess.mit.edu](https://tess.mit.edu/) |
+| **NASA Exoplanet Archive** | Catalog of confirmed exoplanets | [exoplanetarchive.ipac.caltech.edu](https://exoplanetarchive.ipac.caltech.edu/) |
 
-### Библиотеки
+### Libraries
 
-| Библиотека | Язык | Назначение | Ссылка |
+| Library | Language | Purpose | Link |
 |-----------|------|-----------|--------|
-| `tch-rs` | Rust | LibTorch (PyTorch C++) биндинги для LSTM и тензоров | [github.com/LaurentMazare/tch-rs](https://github.com/LaurentMazare/tch-rs) |
-| `actix-web` | Rust | Фреймворк для создания веб-сервера | [actix.rs](https://actix.rs/) |
-| `lightkurve` | Python | Загрузка и обработка кривых блеска Kepler/TESS | [docs.lightkurve.org](https://docs.lightkurve.org/) |
-| `astropy` | Python | Астрономические вычисления и форматы | [astropy.org](https://www.astropy.org/) |
-| `numpy` | Python | Численные операции | [numpy.org](https://numpy.org/) |
+| `tch-rs` | Rust | LibTorch (PyTorch C++) bindings for LSTM and tensors | [github.com/LaurentMazare/tch-rs](https://github.com/LaurentMazare/tch-rs) |
+| `actix-web` | Rust | Framework for building the web server | [actix.rs](https://actix.rs/) |
+| `lightkurve` | Python | Downloading and processing Kepler/TESS light curves | [docs.lightkurve.org](https://docs.lightkurve.org/) |
+| `astropy` | Python | Astronomical calculations and formats | [astropy.org](https://www.astropy.org/) |
+| `numpy` | Python | Numerical operations | [numpy.org](https://numpy.org/) |
 
 ---
 
-## Лицензия
+## License
 
-Распространяется под лицензией **Apache License 2.0** — свободное использование, в том числе коммерческое, при сохранении указания авторства. Подробности — в файле [LICENSE](LICENSE).
+Distributed under the **Apache License 2.0** — free to use, including commercially, provided attribution is retained. See the [LICENSE](LICENSE) file for details.
 
 ---
