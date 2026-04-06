@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -143,37 +143,37 @@
 <body>
 
 <div class="hero">
-  <div class="badge">Нейросетевой детектор экзопланет</div>
+  <div class="badge">Neural Network Exoplanet Detector</div>
   <h1>Planet<em>Finder</em></h1>
-  <p class="subtitle">Введите данные фотометрической кривой блеска — поток и время — и модель определит число планет на орбите звезды.</p>
+  <p class="subtitle">Enter photometric light curve data — flux and time — and the model will determine the number of planets in a star's orbit.</p>
   <div class="stats-row">
-    <div class="stat"><span class="stat-num">5 000+</span><span class="stat-label">звёзд в датасете</span></div>
-    <div class="stat"><span class="stat-num">&lt;10 мс</span><span class="stat-label">предсказание</span></div>
+    <div class="stat"><span class="stat-num">5 000+</span><span class="stat-label">stars in dataset</span></div>
+    <div class="stat"><span class="stat-num">&lt;10 ms</span><span class="stat-label">prediction</span></div>
   </div>
 </div>
 
 <section>
-  <div class="section-label">01 · Анализ</div>
-  <h2>Введите данные<br><em>кривой блеска</em></h2>
+  <div class="section-label">01 · Analysis</div>
+  <h2>Enter<br><em>light curve</em> data</h2>
   <div class="card">
     <div class="tabs">
-      <button class="tab active" onclick="setMode('cols')">По столбцам</button>
+      <button class="tab active" onclick="setMode('cols')">By columns</button>
       <button class="tab" onclick="setMode('raw')">Raw</button>
     </div>
     <div id="mode-cols">
-      <div class="col-header"><span>Поток</span><span>Время</span><span></span></div>
+      <div class="col-header"><span>Flux</span><span>Time</span><span></span></div>
       <div class="rows-list" id="rowsList"></div>
-      <button class="add-btn" onclick="addRow()">+ добавить точку</button>
+      <button class="add-btn" onclick="addRow()">+ add point</button>
     </div>
     <div id="mode-raw">
-      <span class="raw-label">Данные кривой блеска</span>
+      <span class="raw-label">Light curve data</span>
       <textarea id="rawInput" spellcheck="false" placeholder="0.9984 131.20&#10;0.9991 131.45&#10;0.9978 131.70&#10;..."></textarea>
-      <p class="hint">Каждая строка: поток&ensp;время</p>
+      <p class="hint">Each line: flux&ensp;time</p>
     </div>
-    <button class="submit-btn" id="submitBtn" onclick="analyze()">Анализировать</button>
+    <button class="submit-btn" id="submitBtn" onclick="analyze()">Analyze</button>
     <div class="error" id="errEl"></div>
     <div class="result" id="resultEl">
-      <div class="result-label">Обнаружено планет</div>
+      <div class="result-label">Planets detected</div>
       <div class="result-num" id="resultNum">—</div>
       <div class="result-sub" id="resultSub"></div>
     </div>
@@ -181,41 +181,41 @@
 </section>
 
 <section>
-  <div class="section-label">02 · Метод</div>
-  <h2>Транзитная фотометрия<br><em>+ LSTM</em></h2>
+  <div class="section-label">02 · Method</div>
+  <h2>Transit photometry<br><em>+ LSTM</em></h2>
   <div class="steps">
-    <div class="step"><div class="step-num">01</div><h3>Данные NASA</h3><p>lightkurve загружает кривые блеска Kepler/TESS. Нормализация, удаление NaN, фильтрация шума.</p></div>
-    <div class="step"><div class="step-num">02</div><h3>Предобработка</h3><p>Нормализация яркости и времени в диапазон [0, 1]. Сохранение подготовленных данных в learn*.txt.</p></div>
-    <div class="step"><div class="step-num">03</div><h3>Обучение LSTM</h3><p>Rust + tch-rs обучает рекуррентную сеть. Автосохранение лучшей модели в model.ot по MSE.</p></div>
-    <div class="step"><div class="step-num">04</div><h3>Предсказание</h3><p>Ввод кривой → LSTM слои памяти → Linear hidden→1 → число планет. Менее 10 мс.</p></div>
+    <div class="step"><div class="step-num">01</div><h3>NASA Data</h3><p>lightkurve downloads Kepler/TESS light curves. Normalization, NaN removal, noise filtering.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>Preprocessing</h3><p>Brightness and time normalization to the range [0, 1]. Saving prepared data to learn*.txt.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>LSTM Training</h3><p>Rust + tch-rs trains a recurrent network. Auto-saving the best model to model.ot by MSE.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Prediction</h3><p>Light curve input → LSTM memory layers → Linear hidden→1 → number of planets. Under 10 ms.</p></div>
   </div>
   <div class="arch-flow">
-    <div class="arch-node"><div class="arch-node-label">Вход</div><div class="arch-node-val">[brightness, time]</div></div>
+    <div class="arch-node"><div class="arch-node-label">Input</div><div class="arch-node-val">[brightness, time]</div></div>
     <div class="arch-arrow">→</div>
-    <div class="arch-node"><div class="arch-node-label">LSTM</div><div class="arch-node-val">слои памяти</div></div>
+    <div class="arch-node"><div class="arch-node-label">LSTM</div><div class="arch-node-val">memory layers</div></div>
     <div class="arch-arrow">→</div>
     <div class="arch-node"><div class="arch-node-label">Linear</div><div class="arch-node-val">hidden → 1</div></div>
     <div class="arch-arrow">→</div>
-    <div class="arch-node"><div class="arch-node-label">Выход</div><div class="arch-node-val">N планет</div></div>
+    <div class="arch-node"><div class="arch-node-label">Output</div><div class="arch-node-val">N planets</div></div>
   </div>
 </section>
 
 <section>
-  <div class="section-label">03 · Технологии</div>
-  <h2>Стек под<br><em>капотом</em></h2>
+  <div class="section-label">03 · Technologies</div>
+  <h2>The stack<br><em>under the hood</em></h2>
   <div class="tech-grid">
-    <div class="tech-item"><div class="tech-dot" style="background:#9b59b6"></div><div><h4>Rust 1.70+</h4><p>Основной язык — максимальная скорость и безопасность памяти без GC.</p></div></div>
-    <div class="tech-item"><div class="tech-dot" style="background:#3498db"></div><div><h4>tch-rs / LibTorch</h4><p>PyTorch C++ API — LSTM, тензорные операции, автодифференцирование.</p></div></div>
-    <div class="tech-item"><div class="tech-dot" style="background:#e67e22"></div><div><h4>NASA lightkurve</h4><p>Загрузка и обработка данных Kepler/TESS через Python-пайплайн.</p></div></div>
-    <div class="tech-item"><div class="tech-dot" style="background:#2ecc71"></div><div><h4>CUDA (опционально)</h4><p>GPU-ускорение обучения и инференса до ×10 на совместимых картах.</p></div></div>
-    <div class="tech-item"><div class="tech-dot" style="background:#e74c3c"></div><div><h4>Apache 2.0</h4><p>Открытый исходный код, свободное коммерческое использование.</p></div></div>
-    <div class="tech-item"><div class="tech-dot" style="background:#1a1814"></div><div><h4>LSTM — Long Short-Term Memory</h4><p>Захватывает транзитные паттерны, разнесённые на недели и месяцы. Устойчива к шуму реальных данных.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#9b59b6"></div><div><h4>Rust 1.70+</h4><p>The primary language — maximum speed and memory safety without GC.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#3498db"></div><div><h4>tch-rs / LibTorch</h4><p>PyTorch C++ API — LSTM, tensor operations, automatic differentiation.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#e67e22"></div><div><h4>NASA lightkurve</h4><p>Loading and processing Kepler/TESS data via a Python pipeline.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#2ecc71"></div><div><h4>CUDA (optional)</h4><p>GPU-accelerated training and inference up to ×10 on compatible cards.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#e74c3c"></div><div><h4>Apache 2.0</h4><p>Open source code, free commercial use.</p></div></div>
+    <div class="tech-item"><div class="tech-dot" style="background:#1a1814"></div><div><h4>LSTM — Long Short-Term Memory</h4><p>Captures transit patterns spread across weeks and months. Robust to noise in real-world data.</p></div></div>
   </div>
 </section>
 
 <section>
   <div class="section-label">04 · MVP</div>
-  <h2>Рабочий прототип<br><em>уже готов</em></h2>
+  <h2>A working prototype<br><em>already ready</em></h2>
   <div class="terminal">
     <div class="terminal-bar">
       <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
@@ -226,11 +226,11 @@
       <div><span class="t-ok">   Compiling</span> planetfinder v1.0.1</div>
       <div><span class="t-ok">   Finished</span> [optimized] target(s)</div>
       <div>&nbsp;</div>
-      <div><span class="t-prompt">&gt;&gt;</span> Режим (1=обучение, 2=предсказание): <span style="color:#fff">2</span></div>
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:rgba(255,255,255,.4)">Загружена модель: model.ot</span></div>
-      <div><span class="t-prompt">&gt;&gt;</span> Вводите 'яркость время'. end = результат</div>
+      <div><span class="t-prompt">&gt;&gt;</span> Mode (1=training, 2=prediction): <span style="color:#fff">2</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:rgba(255,255,255,.4)">Model loaded: model.ot</span></div>
+      <div><span class="t-prompt">&gt;&gt;</span> Enter 'brightness time'. end = result</div>
       <div>&nbsp;&nbsp;&nbsp;&nbsp;0.998&nbsp;&nbsp;131.2</div>
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-transit">0.872&nbsp;&nbsp;134.8&nbsp;&nbsp;&nbsp;&lt;- транзит!</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-transit">0.872&nbsp;&nbsp;134.8&nbsp;&nbsp;&nbsp;&lt;- transit!</span></div>
       <div>&nbsp;&nbsp;&nbsp;&nbsp;0.999&nbsp;&nbsp;136.6</div>
       <div>&nbsp;&nbsp;&nbsp;&nbsp;end</div>
       <div>&nbsp;</div>
@@ -240,7 +240,7 @@
 </section>
 
 <div class="github-section">
-  <div class="section-label" style="margin-bottom:16px;">05 · Исходный код</div>
+  <div class="section-label" style="margin-bottom:16px;">05 · Source code</div>
   <div class="github-block">
     <div class="github-top">
         <a class="github-url" href="https://github.com/Ztry8/PlanetFinder" target="_blank">github.com/Ztry8/PlanetFinder</a>
