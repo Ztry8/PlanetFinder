@@ -109,7 +109,7 @@
     .github-top { padding: 56px 60px; display: flex; align-items: center; text-align: center; justify-content: center; gap: 40px; border-bottom: 1px solid var(--border2); }
     .github-wordmark { font-family: var(--serif); font-weight: 700; font-size: clamp(3rem, 8vw, 6.5rem); letter-spacing: -.04em; line-height: 1; color: var(--text); }
     .github-wordmark span { color: var(--accent); font-style: italic; }
-    .github-url { border-bottom: 2px solid var(--accent); transition: color .2s, border-color .2s; font-weight: 700; font-size: clamp(2.5rem, 1.5vw, 6.5rem); letter-spacing: -.04em; line-height: 1; text-align: center; font-family: var(--mono); color: var(--accent); text-decoration: none; padding-bottom: 2px; transition: border-color .2s; white-space: nowrap; }
+    .github-url { border-bottom: 2px solid var(--accent); transition: color .2s, border-color .2s; font-weight: 700; font-size: clamp(1rem, 4vw, 2rem); letter-spacing: -.04em; line-height: 1; text-align: center; font-family: var(--mono); color: var(--accent); text-decoration: none; padding-bottom: 2px; transition: border-color .2s; white-space: nowrap; }
     .github-url:hover { border-color: var(--accent2); color: var(--accent2); }
     .github-tags { display: flex; }
     .github-tag { flex: 1; padding: 16px 24px; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); border-right: 1px solid var(--border2); text-align: center; }
@@ -222,11 +222,10 @@
       <span class="terminal-name">PlanetFinder — Terminal</span>
     </div>
     <div class="terminal-body">
-      <div><span class="t-cmd">$ cargo run --release</span></div>
+      <div><span class="t-cmd">$ cargo run --release predict</span></div>
       <div><span class="t-ok">   Compiling</span> planetfinder v1.0.1</div>
       <div><span class="t-ok">   Finished</span> [optimized] target(s)</div>
       <div>&nbsp;</div>
-      <div><span class="t-prompt">&gt;&gt;</span> Mode (1=training, 2=prediction): <span style="color:#fff">2</span></div>
       <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:rgba(255,255,255,.4)">Model loaded: model.ot</span></div>
       <div><span class="t-prompt">&gt;&gt;</span> Enter 'brightness time'. end = result</div>
       <div>&nbsp;&nbsp;&nbsp;&nbsp;0.998&nbsp;&nbsp;131.2</div>
@@ -253,6 +252,9 @@
       <div class="github-tag">Open Source</div>
     </div>
   </div>
+</div>
+<div style="text-align:center; padding: 32px 24px 56px; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim);">
+  by <a href="https://github.com/Ztry8" target="_blank" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(41,82,212,0.25); padding-bottom: 1px;">Ztry8 (AslanD)</a>
 </div>
 
 <script>
